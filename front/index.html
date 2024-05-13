@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Création de Room et Invitation</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="messages"></div>
-<!--<input type="text" id="messageInput" placeholder="Type your message">
-<button onclick="sendMessage()">Send</button> -->
-<input type="text" id="roomInput" placeholder="Room name">
-<button onclick="joinRoom()">Join Room</button>
-<button onclick="leaveRoom()">Leave Room</button>
-<input type="text" id="inviteUserId" placeholder="User ID to invite">
-<button onclick="inviteUser()">Invite User</button>
-<input type="text" id="newRoomInput" placeholder="New room name">
-<button onclick="createRoom()">Create Room</button>
-<button onclick="deleteRoom('roomName')">Delete Room</button>
+<div id="app">
+    <h1>Création de Room et Invitation</h1>
+    <input type="text" id="roomNameInput" placeholder="Nom de la Room">
+    <button onclick="createRoom()">Créer Room</button>
+    <input type="text" id="roomIdInput" placeholder="ID de la Room">
+    <input type="text" id="userIdInput" placeholder="ID de l'Utilisateur">
+    <button onclick="inviteUser()">Inviter Utilisateur</button>
+</div>
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script src="script.js"></script>
 </body>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-<script src="./script.js"></script>
 </html>
