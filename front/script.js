@@ -8,59 +8,66 @@ socket.on('message', (msg) => {
     displayMessage(msg);
 });
 
-socket.on('join', (room) => {
-    console.log('Joined room: ' + room);
+socket.on('join', (dept) => {
+    console.log('Joined dept: ' + dept);
 });
 
-socket.on('leave', (room) => {
-    console.log('leave room: ' + room);
+socket.on('leave', (dept) => {
+    console.log('leave dept: ' + dept);
 });
 
-socket.on('deleteRoom', (room) => {
-    console.log('delete room: ' + room);
+socket.on('deleteDept', (dept) => {
+    console.log('delete dept: ' + dept);
 });
-socket.on('invitation', (room) => {
-    const accept = confirm(`You've been invited to join room "${room}". Do you accept?`);
+
+socket.on('invitation', (dept) => {
+    const accept = confirm(`You've been invited to join dept "${dept}". Do you accept?`);
     if (accept) {
-        socket.emit('join', room);
-        console.log('Joined room: ' + room);
+        socket.emit('join', dept);
+        console.log('Joined dept: ' + dept);
     }
 });
 
+socket.on('updateDept', (dept) => {
+    console.log('update dept: ' + dept);
+    const deptList = document.getElementById('deptList')
+})
 /*function sendMessage() {
     const message = document.getElementById('messageInput').value;
     socket.emit('message', message);
 }*/
 
-function leaveRoom() {
-    const room = document.getElementById('roomInput').value;
-    socket.emit('leave', room);
+function leaveDept() {
+    const dept = document.getElementById('deptInput').value;
+    socket.emit('leave', dept);
 }
 
-function joinRoom() {
-    const room = document.getElementById('roomInput').value;
-    socket.emit('join', room);
+function joinDept() {
+    const dept = document.getElementById('deptInput').value;
+    socket.emit('join', dept);
 }
 
 function inviteUser() {
-    const room = document.getElementById('roomInput').value;
+    const dept = document.getElementById('deptInput').value;
     const invitedUserId = document.getElementById('inviteUserId').value;
-    socket.emit('invite', room, invitedUserId);
+    socket.emit('invite', dept, invitedUserId);
 }
 
-function createRoom() {
-    const roomName = document.getElementById('newRoomInput').value;
-    socket.emit('createRoom', roomName);
+function createDept() {
+    const deptName = document.getElementById('newDeptInput').value;
+    socket.emit('createDept', deptName);
 }
-function deleteRoom(room) {
-    socket.emit('deleteRoom', room);
+function deleteDept(dept) {
+    socket.emit('deleteDept', dept);
 }
-
-
 
 function displayMessage(msg) {
     const messagesDiv = document.getElementById('messages');
     const messageElement = document.createElement('div');
     messageElement.textContent = msg;
     messagesDiv.appendChild(messageElement);
+}
+
+function getdept() {
+    socket.emit('getdept');
 }
