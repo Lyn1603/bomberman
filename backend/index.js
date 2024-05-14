@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
     res.json('ip address: http://' + ip.address()+':'+PORT);    
 });
 
-const activeDepts = ['Default Department'];
+const activeDepts = ["je"];
 
 io.on('connection', (socket) => {
     console.log('a user connected');
@@ -28,6 +28,36 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('user disconnected');
         socket.broadcast.emit('user disconnected');
+    });
+
+    // When a client requests the list of active dept, send it to them
+    socket.on('getDept', () => {
+        let noDept = activeDepts.length === 0
+        console.log(activeDepts, noDept)
+        if (!noDept) {
+            const name = "Default Department"
+            console.log('helo', typeof(name))
+            socket.emit('updateDept', activeDepts);
+            console.log(name)
+        }
+        socket.emit('updateDept', activeDepts);
+    })
+
+    // Handle createDept event
+    socket.on('createDept', (deptName) => {
+        console.log("create", deptName)
+        const deptExists = activeDepts.includes(deptName)
+        if (!deptExists) {
+            activeDepts.push(deptName);
+            console.log('Creating dept: ' + deptName);
+            socket.join(deptName);
+            io.emit('deptCreated', deptName);
+            io.emit('updateDept', activeDepts);
+        } else {
+            console.error('Department already exists: ' + deptName);
+            // Send an error message to the client if the department already exists
+            socket.emit('deptExistsError', deptName);
+        }
     });
 
     socket.on('message', (msg) => {
@@ -44,7 +74,7 @@ io.on('connection', (socket) => {
         const roomExists = io.sockets.adapter.rooms.has(dept);
         if (roomExists) {
             socket.join(dept);
-            io.to(dept).emit('join', dept);
+            console.log("Join dept: " + dept)
         } else {
             console.error('Dept does not exist: ' + dept);
         }
@@ -64,27 +94,6 @@ io.on('connection', (socket) => {
         io.to(dept).emit('leave', dept);
     });
 
-    // Handle createDept event
-    socket.on('createDept', (deptName) => {
-        const deptExists = activeDepts.includes(deptName)
-        if (!deptExists) {
-            activeDepts.push(deptName);
-            console.log('Creating dept: ' + deptName);
-            socket.join(deptName);
-            io.emit('deptCreated', deptName);
-            io.emit('updateDept', activeDepts);
-        } else {
-            console.error('Department already exists: ' + deptName);
-            // Send an error message to the client if the department already exists
-            socket.emit('deptExistsError', deptName);
-        }
-    });
-
-    // When a client requests the list of active dept, send it to them
-    socket.on('getDept', () => {
-        socket.emit('updateDept', activeDepts);
-    })
-
     // Handle deleteDept event
     socket.on('deleteDept', (deptName) => {
         const index = activeDepts.indexOf(deptName);
@@ -92,6 +101,10 @@ io.on('connection', (socket) => {
             activeDepts.splice(index, 1);
             io.emit('updateDept', activeDepts);
         }
+    });
+
+    socket.on('joinRoom', (roomName) => {
+        io.emit('redirectToBombermanPage', roomName);
     });
 
 })

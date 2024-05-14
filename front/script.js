@@ -1,33 +1,29 @@
 const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
-    console.log('Connected to server');
     getDept();
 });
 
-socket.on('message', (msg) => {
-    displayMessage(msg);
-});
 
-socket.on('join', (dept) => {
-    console.log('Joined dept: ' + dept);
-});
+// Function to request the list of active departments from the server
+function getDept() {
+    socket.emit('getDept');
+}
 
-socket.on('leave', (dept) => {
-    console.log('Leave dept: ' + dept);
-});
+// Create a new department
+function createDept() {
+    const deptName = document.getElementById('newDeptInput').value;
+    if (!deptName) return;
+    console.log(deptName)
 
-socket.on('deleteDept', (dept) => {
-    console.log('Delete dept: ' + dept);
-});
+    console.log(typeof(deptName))
+    socket.emit('createDept', deptName);
+}
 
-socket.on('invitation', (dept) => {
-    const accept = confirm(`You've been invited to join dept "${dept}". Do you accept?`);
-    if (accept) {
-        socket.emit('join', dept);
-        console.log('Joined dept: ' + dept);
-    }
-});
+// Delete a department
+function deleteDept(dept) {
+    socket.emit('deleteDept', dept);
+}
 
 // Update the list of departments when received from the server
 socket.on('updateDept', (depts) => {
@@ -37,13 +33,18 @@ socket.on('updateDept', (depts) => {
     depts.forEach((dept, index) => {
         const deptElement = document.createElement('div');
         deptElement.textContent = dept;
-        deptElement.classList.add('dept-card'); // Add class to style the card
+        deptElement.classList.add('dept-card');
+        deptElement.addEventListener('click', () => {
+            joinDept(dept);
+            // Redirect to the new page after joining the department
+            navigateToBombermanPage(dept);
+        });
         deptsList.appendChild(deptElement);
         if (index === depts.length - 1) {
             // Create a "create" card for the last department
             const createCard = document.createElement('div');
-            createCard.id = 'createCard'; // Assign ID to the create card
-            createCard.classList.add('create-card'); // Add class to style the card
+            createCard.id = 'createCard';
+            createCard.classList.add('create-card');
             const input = document.createElement('input');
             input.id = 'newDeptInput';
             input.classList.add('newDeptInput');
@@ -62,22 +63,29 @@ socket.on('updateDept', (depts) => {
     });
 });
 
-// Function to request the list of active departments from the server
-function getDept() {
-    socket.emit('getDept');
+// Function to navigate to Bomberman page with selected department
+function navigateToBombermanPage(deptName) {
+    window.location.href = `game.html?dept=${deptName}`;
 }
+
+// Join a department
+function joinDept(dept) {
+    console.log("join", dept)
+    socket.emit('join', dept);
+
+    // Emit the 'joinRoom' event with the room name
+    socket.emit('joinRoom', dept);
+}
+
+// Listen for the event to redirect to Bomberman page
+socket.on('redirectToBombermanPage', (roomName) => {
+    navigateToBombermanPage(roomName);
+});
 
 // Function to leave a department
 function leaveDept() {
     const dept = document.getElementById('deptInput').value;
     socket.emit('leave', dept);
-}
-
-// Join a department
-function joinDept() {
-    const dept = document.getElementById('deptInput').value;
-    console.log(dept)
-    socket.emit('join', dept);
 }
 
 // Invite to a department
@@ -87,18 +95,6 @@ function inviteUser() {
     socket.emit('invite', dept, invitedUserId);
 }
 
-// Create a new department
-function createDept() {
-    const deptName = document.getElementById('newDeptInput').value;
-    if (!deptName) return;
-    socket.emit('createDept', deptName);
-}
-
-// Delete a department
-function deleteDept(dept) {
-    socket.emit('deleteDept', dept);
-}
-
 // Display a message in the UI
 function displayMessage(msg) {
     const messagesDiv = document.getElementById('messages');
@@ -106,3 +102,11 @@ function displayMessage(msg) {
     messageElement.textContent = msg;
     messagesDiv.appendChild(messageElement);
 }
+
+socket.on('invitation', (dept) => {
+    const accept = confirm(`You've been invited to join dept "${dept}". Do you accept?`);
+    if (accept) {
+        socket.emit('join', dept);
+        console.log('Joined dept: ' + dept);
+    }
+});
