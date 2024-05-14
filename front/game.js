@@ -1,12 +1,34 @@
 const socket = io('http://localhost:3000');
 
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d')
 
 const blockSize = 40; // Définition de la taille du bloc
 
 const bombSize = blockSize / 2;
 const playerSize = blockSize / 2;
+
+const numRows = 15; // Nombre de lignes
+const numCols = 15; // Nombre de colonnes
+
+// Tableau représentant la disposition des éléments dans votre jeu
+const gameMap = [
+    "ppppppppppppppp",
+    "pssbbbbbbbbbssp",
+    "pspbpbpbpbpbpsp",
+    "pbbbbbbbbbbbbbp",
+    "pbpbpbpbpbpbpbp",
+    "pbbbbbbbbbbbbbp",
+    "pbpbpbpbpbpbpbp",
+    "pbbbbbbbbbbbbbp",
+    "pbpbpbpbpbpbpbp",
+    "pbbbbbbbbbbbbbp",
+    "pbpbpbpbpbpbpbp",
+    "pbbbbbbbbbbbbbp",
+    "pspbpbpbpbpbpsp",
+    "pssbbbbbbbbbssp",
+    "ppppppppppppppp"
+];
 
 let players = {};
 let bombs = [];
@@ -15,36 +37,70 @@ let isPlayerDead = false
 
 
 
+// Chargement des images
+const pillarImg = new Image();
+pillarImg.src = 'assets/pillar.png'; // Chemin vers l'image du pilier
+
+const brickImg = new Image();
+brickImg.src = 'assets/brick.png'; // Chemin vers l'image de la brique
+
+const floorImg = new Image();
+floorImg.src = 'assets/floor.png'; // Chemin vers l'image du sol
+
+const playerImg = new Image();
+playerImg.src = 'assets/player1.png'; // Chemin vers l'image du joueur
+
+const bombImg = new Image();
+bombImg.src = 'assets/bomb.png';
+
 // Dessine un joueur
 function drawPlayer(player) {
-    // Charger l'image
-    let img = new Image();
-    img.src = 'assets/player1.png';
-
-    // Dessiner l'image lorsque chargée
-    img.onload = function() {
-        ctx.drawImage(img, player.x, player.y, playerSize, playerSize);
-    };
+    ctx.drawImage(playerImg, player.x, player.y, playerSize, playerSize);
 }
-
 
 // Dessine toutes les bombes
 function drawBombs() {
-    ctx.fillStyle = 'red';
     bombs.forEach(bomb => {
-        ctx.beginPath();
-        ctx.arc(bomb.x + bombSize / 2, bomb.y + bombSize / 2, bombSize / 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.drawImage(bombImg, bomb.x, bomb.y, bombSize, bombSize);
     });
 }
 
 // Dessine tous les joueurs
-function drawPlayers() {
+function  drawPlayers() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let playerId in players) {
         drawPlayer(players[playerId]);
     }
 }
+
+// Fonction pour dessiner les éléments sur le canvas
+function drawGameMap() {
+    for (let row = 0; row < numRows; row++) {
+
+        for (let col = 0; col < numCols; col++) {
+
+            const tile = gameMap[row][col];
+            let img;
+
+            switch (tile) {
+                case 'p':
+                    img = pillarImg;
+                    break;
+                case 'b':
+                    img = brickImg;
+                    break;
+                case 's':
+                    img = floorImg;
+                    break;
+                default:
+                    continue;
+            }
+
+            ctx.drawImage(img, col * blockSize, row * blockSize, blockSize, blockSize);
+        }
+    }
+}
+
 
 // Gère les mouvements des joueurs
 document.addEventListener('keydown', (event) => {
@@ -106,12 +162,6 @@ document.addEventListener('keydown', (event) => {
 });
 
 
-// Met à jour le jeu
-function updateGame() {
-    drawPlayers();
-    drawBombs();
-}
-
 // Gère la réception des mouvements des autres joueurs
 socket.on('updatePlayers', (data) => {
     players = data;
@@ -134,3 +184,13 @@ socket.on('playerDead', (playerId) => {
         console.log('Another player died');
     }
 });
+
+// Met à jour le jeu
+// Met à jour le jeu
+function updateGame() {
+    drawBombs();   // Dessine ensuite les bombes
+    drawPlayers(); // Puis dessine les joueurs
+    drawGameMap();   // Dessine d'abord les éléments de la scène (décors, obstacles, etc.)
+
+
+}
