@@ -5,8 +5,8 @@ const ctx = canvas.getContext('2d')
 
 const blockSize = 40; // Définition de la taille du bloc
 
-const bombSize = blockSize / 2;
-const playerSize = blockSize / 2;
+const bombSize = blockSize ;
+const playerSize = blockSize ;
 
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
@@ -66,12 +66,17 @@ function drawBombs() {
 }
 
 // Dessine tous les joueurs
-function  drawPlayers() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function drawPlayers() {
+    // Efface la zone du joueur en remplissant avec une couleur transparente
+    ctx.fillStyle = 'rgba(0, 0, 0, 0)';
     for (let playerId in players) {
-        drawPlayer(players[playerId]);
+        let player = players[playerId];
+        ctx.fillRect(player.x, player.y, playerSize, playerSize);
+        drawPlayer(player); // Dessine le joueur par-dessus le fond transparent
     }
 }
+
+
 
 // Fonction pour dessiner les éléments sur le canvas
 function drawGameMap() {
@@ -188,9 +193,9 @@ socket.on('playerDead', (playerId) => {
 // Met à jour le jeu
 // Met à jour le jeu
 function updateGame() {
-    drawBombs();   // Dessine ensuite les bombes
-    drawPlayers(); // Puis dessine les joueurs
     drawGameMap();   // Dessine d'abord les éléments de la scène (décors, obstacles, etc.)
+    drawPlayers(); // Puis dessine les joueurs
+    drawBombs();   // Dessine ensuite les bombes
 
 
 }
