@@ -17,9 +17,16 @@ let isPlayerDead = false
 
 // Dessine un joueur
 function drawPlayer(player) {
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(player.x, player.y, playerSize, playerSize);
+    // Charger l'image
+    var img = new Image();
+    img.src = '../assets/player1.png';
+
+    // Dessiner l'image lorsque chargée
+    img.onload = function() {
+        ctx.drawImage(img, player.x, player.y, playerSize, playerSize);
+    };
 }
+
 
 // Dessine toutes les bombes
 function drawBombs() {
