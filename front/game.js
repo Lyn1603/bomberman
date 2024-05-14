@@ -18,8 +18,8 @@ let isPlayerDead = false
 // Dessine un joueur
 function drawPlayer(player) {
     // Charger l'image
-    var img = new Image();
-    img.src = '../assets/player1.png';
+    let img = new Image();
+    img.src = 'assets/player1.png';
 
     // Dessiner l'image lorsque chargée
     img.onload = function() {
