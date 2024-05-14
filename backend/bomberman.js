@@ -12,7 +12,7 @@ const io = new Server(server, {
 })
 app.use(cors())
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 const blockSize = 40; // Définition de la taille du bloc
 
