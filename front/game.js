@@ -13,8 +13,8 @@ const numCols = 15; // Nombre de colonnes
 
 // Tableau représentant la disposition des éléments dans votre jeu
 const gameMap = [
-    "ppppppppppppppp",
-    "pssbbbbbbbbbssp",
+    "spppppppppppppp",
+    "sssbbbbbbbbbssp",
     "pspbpbpbpbpbpsp",
     "pbbbbbbbbbbbbbp",
     "pbpbpbpbpbpbpbp",
