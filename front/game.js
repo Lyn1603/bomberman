@@ -13,7 +13,7 @@ const numCols = 15; // Nombre de colonnes
 
 // Tableau représentant la disposition des éléments dans votre jeu
 const gameMap = [
-    "ppppppppppppppp",
+    "ssppppppppppppp",
     "pssbbbbbbbbbssp",
     "pspbpbpbpbpbpsp",
     "pbbbbbbbbbbbbbp",
@@ -36,7 +36,6 @@ let lastDirection = ''; // Variable pour stocker la dernière direction
 let isPlayerDead = false
 
 
-
 // Chargement des images
 const pillarImg = new Image();
 pillarImg.src = 'assets/pillar.png'; // Chemin vers l'image du pilier
@@ -53,10 +52,13 @@ playerImg.src = 'assets/player1.png'; // Chemin vers l'image du joueur
 const bombImg = new Image();
 bombImg.src = 'assets/bomb.png';
 
+
+
 // Dessine un joueur
 function drawPlayer(player) {
     ctx.drawImage(playerImg, player.x, player.y, playerSize, playerSize);
 }
+
 
 // Dessine toutes les bombes
 function drawBombs() {
@@ -64,6 +66,7 @@ function drawBombs() {
         ctx.drawImage(bombImg, bomb.x, bomb.y, bombSize, bombSize);
     });
 }
+
 
 // Dessine tous les joueurs
 function drawPlayers() {
@@ -75,7 +78,6 @@ function drawPlayers() {
         drawPlayer(player); // Dessine le joueur par-dessus le fond transparent
     }
 }
-
 
 
 // Fonction pour dessiner les éléments sur le canvas
@@ -113,6 +115,7 @@ document.addEventListener('keydown', (event) => {
     if (isPlayerDead) {
         return; // Ne rien faire si le joueur est mort
     }
+
     let direction = '';
     switch(event.key) {
         case 'z':
@@ -130,10 +133,47 @@ document.addEventListener('keydown', (event) => {
         default:
             return; // Ne rien faire pour d'autres touches
     }
-    socket.emit('move', direction);
-    lastDirection = direction; // Met à jour la dernière direction
+    // Vérifie si le mouvement est autorisé
+    if (isMovementAllowed(direction)) {
+        socket.emit('move', direction);
+        lastDirection = direction; // Met à jour la dernière direction
+    }
+
 
 });
+
+// Fonction pour vérifier si le mouvement est autorisé
+function isMovementAllowed(direction) {
+    let player = players[socket.id];
+    let nextX = player.x;
+    let nextY = player.y;
+
+    // Calcul des coordonnées du prochain mouvement
+    switch (direction) {
+        case 'Up':
+            nextY -= blockSize;
+            break;
+        case 'Down':
+            nextY += blockSize;
+            break;
+        case 'Left':
+            nextX -= blockSize;
+            break;
+        case 'Right':
+            nextX += blockSize;
+            break;
+    }
+
+    // Convertit les coordonnées en indices de tableau
+    let col = Math.floor(nextX / blockSize);
+    let row = Math.floor(nextY / blockSize);
+
+    // Vérifie si la case dans la direction du mouvement contient un pilier
+    return gameMap[row][col] !== 'p';
+
+}
+
+
 
 // Gère le dépôt de bombes
 document.addEventListener('keydown', (event) => {
@@ -161,6 +201,7 @@ document.addEventListener('keydown', (event) => {
                 bombX += blockSize;
                 break;
         }
+
 
         socket.emit('placeBomb', { x: bombX, y: bombY });
     }
@@ -190,7 +231,7 @@ socket.on('playerDead', (playerId) => {
     }
 });
 
-// Met à jour le jeu
+
 // Met à jour le jeu
 function updateGame() {
     drawGameMap();   // Dessine d'abord les éléments de la scène (décors, obstacles, etc.)
