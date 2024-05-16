@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000');
+const socket = io('http://localhost:3001');
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d')
@@ -10,6 +10,24 @@ const playerSize = blockSize ;
 
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
+
+function getRoom()
+{
+    const sPageURL = window.location.search.substring(1);
+    const sURLVariables = sPageURL.split('&');
+    for (let i = 0; i < sURLVariables.length; i++)
+    {
+        const sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === 'dept')
+        {
+            console.log(sParameterName[1])
+            return sParameterName[1];
+        }
+    }
+}
+let room = getRoom()
+
+console.log(room)
 
 // Tableau représentant la disposition des éléments dans votre jeu
 const gameMap = [
@@ -131,6 +149,7 @@ document.addEventListener('keydown', (event) => {
             return; // Ne rien faire pour d'autres touches
     }
     socket.emit('move', direction);
+    // socket.emit('move', getRoom(), direction);
     lastDirection = direction; // Met à jour la dernière direction
 
 });

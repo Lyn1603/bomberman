@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 3001;
 
 const blockSize = 40; // Définition de la taille du bloc
 
+// let activeGame = []
 const players = {};
 let bombs = [];
 
@@ -37,6 +38,8 @@ io.on('connection', (socket) => {
 
     // Gère les mouvements des joueurs
     socket.on('move', (direction) => {
+        // socket.emit('createDept', room)
+        // console.log(room, direction);
         // Vérifie si le joueur est mort
         if (players[socket.id] === undefined) {
             return; // Ne rien faire si le joueur est mort
@@ -63,6 +66,7 @@ io.on('connection', (socket) => {
 
         // Met à jour tous les joueurs
         io.emit('updatePlayers', players);
+        // // io.to(room).emit('updatePlayers', players);
     });
 
 
@@ -81,6 +85,21 @@ io.on('connection', (socket) => {
 
     });
 
+    socket.on('creatGame', (gameName) => {
+        console.log("create", gameName)
+        const deptExists = activeGame.includes(gameName)
+        if (!deptExists) {
+            activeGame.push(gameName);
+            console.log('Creating dept: ' + gameName);
+            socket.join(gameName);
+            io.emit('deptCreated', gameName);
+            io.emit('updateDept', activeGame);
+        } else {
+            console.error('Department already exists: ' + gameName);
+            // Send an error message to the client if the department already exists
+            socket.emit('deptExistsError', gameName);
+        }
+    });
 
     socket.on('disconnect', () => {
         console.log('Client disconnected');
