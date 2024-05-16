@@ -234,36 +234,6 @@ socket.on('playerDead', (playerId) => {
     }
 });
 
-// Démarre le timer du jeu
-function startGameTimer() {
-    setInterval(updateGameTimer, 1000); // Met à jour le timer chaque seconde
-}
-
-// Met à jour le timer du jeu
-function updateGameTimer() {
-    elapsedTime++; // Incrémente le temps écoulé
-
-    // Vérifie si la minute est écoulée
-    if (elapsedTime >= gameTimeLimit) {
-        // Arrête le jeu ou déclenche des actions spécifiques lorsque la minute est écoulée
-        handleGameTimeUp();
-    }
-}
-
-// Fonction appelée lorsque la minute de jeu est écoulée
-
-let isGameEnded = false; // Variable pour indiquer si le jeu est terminé
-function handleGameTimeUp() {
-
-    isGameEnded = true
-    console.log("La minute de jeu est écoulée !");
-
-}
-
-// Appelez cette fonction pour démarrer le timer du jeu lorsque votre jeu est prêt à commencer
-startGameTimer();
-
-
 
 // Met à jour le jeu
 function updateGame() {
