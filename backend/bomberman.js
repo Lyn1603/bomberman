@@ -24,7 +24,7 @@ app.use(express.static('public'));
 
 io.on('connection', (socket) => {
     console.log('Client connected');
-
+    socket.emit('createNewGame', )
     players[socket.id] = {
         x: 0, // Position initiale X
         y: 0, // Position initiale Y
