@@ -11,22 +11,17 @@ const playerSize = blockSize ;
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
 
-function getRoom()
-{
+function getRoom() {
     const sPageURL = window.location.search.substring(1);
     const sURLVariables = sPageURL.split('&');
-    for (let i = 0; i < sURLVariables.length; i++)
-    {
+    for (let i = 0; i < sURLVariables.length; i++) {
         const sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] === 'dept')
-        {
-            console.log(sParameterName[1])
+        if (sParameterName[0] === 'dept') {
             return sParameterName[1];
         }
     }
 }
 let room = getRoom()
-
 console.log(room)
 
 // Tableau représentant la disposition des éléments dans votre jeu
@@ -87,12 +82,11 @@ function drawBombs() {
 
 // Dessine tous les joueurs
 function drawPlayers() {
-    // Efface la zone du joueur en remplissant avec une couleur transparente
-    ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGameMap();
     for (let playerId in players) {
         let player = players[playerId];
-        ctx.fillRect(player.x, player.y, playerSize, playerSize);
-        drawPlayer(player); // Dessine le joueur par-dessus le fond transparent
+        drawPlayer(player);
     }
 }
 
@@ -151,21 +145,15 @@ document.addEventListener('keydown', (event) => {
     }
     // Vérifie si le mouvement est autorisé
     if (isMovementAllowed(direction)) {
-        socket.emit('move', direction);
-        // socket.emit('move', getRoom(), direction);
+        socket.emit('move', room, direction);
         lastDirection = direction; // Met à jour la dernière direction
     }
-
-
 });
 
-// Fonction pour vérifier si le mouvement est autorisé
 function isMovementAllowed(direction) {
     let player = players[socket.id];
     let nextX = player.x;
     let nextY = player.y;
-
-    // Calcul des coordonnées du prochain mouvement
     switch (direction) {
         case 'Up':
             nextY -= blockSize;
@@ -179,80 +167,54 @@ function isMovementAllowed(direction) {
         case 'Right':
             nextX += blockSize;
             break;
+        default:
+            return false;
     }
-
-    // Convertit les coordonnées en indices de tableau
-    let col = Math.floor(nextX / blockSize);
-    let row = Math.floor(nextY / blockSize);
-
-    // Vérifie si la case dans la direction du mouvement contient un pilier
-    return gameMap[row][col] !== 'p';
-
+    return !isObstacle(nextX, nextY);
 }
 
-
-
-// Gère le dépôt de bombes
-document.addEventListener('keydown', (event) => {
-    // Vérifie si le joueur est mort
-    if (isPlayerDead || isGameEnded) {
-        return; // Ne rien faire si le joueur est mort
-    }
-
-    if (event.key === ' ') {
-        let bombX = players[socket.id].x;
-        let bombY = players[socket.id].y;
-
-        // Ajuste les coordonnées de la bombe en fonction de la direction du joueur
-        switch (lastDirection) {
-            case 'Up':
-                bombY -= blockSize;
-                break;
-            case 'Down':
-                bombY += blockSize;
-                break;
-            case 'Left':
-                bombX -= blockSize;
-                break;
-            case 'Right':
-                bombX += blockSize;
-                break;
-        }
-
-        socket.emit('placeBomb', { x: bombX, y: bombY });
-    }
-});
-
-
-// Gère la réception des mouvements des autres joueurs
-socket.on('updatePlayers', (data) => {
-    players = data;
-    updateGame();
-});
-
-// Gère la réception des bombes placées par les joueurs
-socket.on('updateBombs', (data) => {
-    bombs = data;
-    updateGame();
-});
-
-// Gère la réception de la mort d'un joueur
-socket.on('playerDead', (playerId) => {
-    if (playerId === socket.id) {
-        isPlayerDead = true
-        console.log('You died!');
-
-    } else {
-        console.log('Another player died');
-    }
-});
-
-
-// Met à jour le jeu
-function updateGame() {
-    drawGameMap();   // Dessine d'abord les éléments de la scène (décors, obstacles, etc.)
-    drawPlayers(); // Puis dessine les joueurs
-    drawBombs();   // Dessine ensuite les bombes
-
-
+function isObstacle(x, y) {
+    const col = x / blockSize;
+    const row = y / blockSize;
+    const tile = gameMap[row][col];
+    return tile === 'p' || tile === 'b';
 }
+
+canvas.addEventListener('click', (event) => {
+    if (isPlayerDead) {
+        return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const bombX = Math.floor(x / blockSize) * blockSize;
+    const bombY = Math.floor(y / blockSize) * blockSize;
+    socket.emit('placeBomb', { x: bombX, y: bombY });
+});
+
+socket.on('updatePlayers', (updatedPlayers) => {
+    players = updatedPlayers;
+    drawPlayers();
+});
+
+socket.on('updateBombs', (updatedBombs) => {
+    bombs = updatedBombs;
+    drawPlayers();
+    drawBombs();
+});
+
+socket.on('playerDead', (deadPlayerId) => {
+    if (socket.id === deadPlayerId) {
+        isPlayerDead = true;
+    }
+});
+
+function resetGame() {
+    players = {};
+    bombs = [];
+    lastDirection = '';
+    isPlayerDead = false;
+}
+
+resetGame();
+drawGameMap();
