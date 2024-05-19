@@ -13,7 +13,7 @@
     </head>
 
     <body >
-        <h1>Bomberman</h1>
+        <h1>Bomberman salle : <span id="name"></span></h1>
 
         <canvas id="gameCanvas" width="600" height="600"></canvas>
 
@@ -21,19 +21,6 @@
         <script src="game.js"></script>
 
         <script>
-
-            socket.on('updatePlayers', (players) => {
-                const gameDiv = document.getElementById('gameCanvas');
-                gameDiv.innerHTML = ''; // Clear previous display
-                Object.keys(players).forEach(playerId => {
-                    const player = players[playerId];
-                    const playerDiv = document.createElement('div');
-                    playerDiv.className = 'player';
-                    playerDiv.style.left = player.x + 'px';
-                    playerDiv.style.top = player.y + 'px';
-                    gameDiv.appendChild(playerDiv);
-                });
-            });
 
         </script>
     </body>

@@ -55,10 +55,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
-        const playerDept = players[socket.id]?.room;
-        if (playerDept) {
-            depts[playerDept] = depts[playerDept].filter(id => id !== socket.id);
-        }
+
         delete players[socket.id];
         io.emit('updatePlayers', players);
         socket.broadcast.emit('user disconnected');
@@ -101,6 +98,7 @@ io.on('connection', (socket) => {
             players[socket.id] = {
                 x: 40,
                 y: 40,
+                room: deptName
             };
             console.log("player1")
         } else if (!playersIntoRoom[deptName]['player2']) {
@@ -108,6 +106,7 @@ io.on('connection', (socket) => {
             players[socket.id] = {
                 x: 520,
                 y: 520,
+                room: deptName
             };
             console.log("player2")
 
@@ -116,6 +115,7 @@ io.on('connection', (socket) => {
             players[socket.id] = {
                 x: 520,
                 y: 40,
+                room: deptName
             };
             console.log("player3")
 
@@ -124,9 +124,12 @@ io.on('connection', (socket) => {
             players[socket.id] = {
                 x: 40,
                 y: 520,
+                room: deptName
             };
             console.log("player4")
         }
+
+        io.to(deptName).emit('updatePlayers', players);
 
         console.log(playersIntoRoom)
         console.log(players)

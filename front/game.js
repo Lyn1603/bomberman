@@ -11,6 +11,20 @@ const playerSize = blockSize;
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
 
+socket.on('updatePlayers', (updatedPlayers) => {
+    players = updatedPlayers;
+    render();
+});
+
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let id in players) {
+        const player = players[id];
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(player.x, player.y, blockSize, blockSize);
+    }
+}
+
 function getDept() {
     const sPageURL = window.location.search.substring(1);
     const sURLVariables = sPageURL.split('&');
@@ -23,6 +37,9 @@ function getDept() {
 }
 let dept = getDept()
 console.log(dept)
+
+const title = document.getElementById('name')
+title.textContent  = dept
 
 const canvasHeight = numCols * blockSize
 const canvasWidth = numRows * blockSize
@@ -194,7 +211,7 @@ function isMovementAllowed(direction) {
             break;
     }
 
-    // Vérifie si le mouvement reste dans les limites du canvas
+/*    // Vérifie si le mouvement reste dans les limites du canvas
     if (nextX < 0 || nextX >= canvasWidth || nextY < 0 || nextY >= canvasHeight) {
         return false;
     }
@@ -204,7 +221,16 @@ function isMovementAllowed(direction) {
     let row = Math.floor(nextY / blockSize);
 
     // Vérifie si la case dans la direction du mouvement contient un pilier
-    return gameMap[row][col] !== 'p';
+    return gameMap[row][col] !== 'p';*/
+
+    return !isObstacle(nextX, nextY)
+}
+
+function isObstacle(x, y) {
+    const col = x / blockSize;
+    const row = y / blockSize;
+    const tile = gameMap[row][col];
+    return tile === 'p' || tile === 'b';
 }
 
 // Gère la réception des mouvements des autres joueurs
