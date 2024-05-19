@@ -25,8 +25,8 @@ io.on('connection', (socket) => {
     console.log('Client connected');
 
     players[socket.id] = {
-        x: 0, // Position initiale X
-        y: 0, // Position initiale Y
+        x: 40, // Position initiale X
+        y: 40, // Position initiale Y
     };
 
     // Met à jour tous les joueurs
@@ -37,6 +37,9 @@ io.on('connection', (socket) => {
 
     // Gère les mouvements des joueurs
     socket.on('move', (direction) => {
+
+        console.log('move');
+        console.log(direction)
         // Vérifie si le joueur est mort
         if (players[socket.id] === undefined) {
             return; // Ne rien faire si le joueur est mort
