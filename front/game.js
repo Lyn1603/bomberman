@@ -11,6 +11,11 @@ const playerSize = blockSize;
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
 
+const canvasHeight = numCols * blockSize
+const canvasWidth = numRows * blockSize
+
+
+
 // Tableau représentant la disposition des éléments dans votre jeu
 const gameMap = [
     "spppppppppppppp",
@@ -180,6 +185,11 @@ function isMovementAllowed(direction) {
             break;
     }
 
+    // Vérifie si le mouvement reste dans les limites du canvas
+    if (nextX < 0 || nextX >= canvasWidth || nextY < 0 || nextY >= canvasHeight) {
+        return false;
+    }
+
     // Convertit les coordonnées en indices de tableau
     let col = Math.floor(nextX / blockSize);
     let row = Math.floor(nextY / blockSize);
@@ -191,12 +201,14 @@ function isMovementAllowed(direction) {
 // Gère la réception des mouvements des autres joueurs
 socket.on('updatePlayers', (data) => {
     players = data;
+    checkCollisions(); // Vérifie les collisions après la mise à jour des joueurs
     updateGame();
 });
 
 // Gère la réception des bombes placées par les joueurs
 socket.on('updateBombs', (data) => {
     bombs = data;
+    checkCollisions(); // Vérifie les collisions après la mise à jour des bombes
     updateGame();
 });
 
@@ -209,6 +221,22 @@ socket.on('playerDead', (playerId) => {
         console.log('Another player died');
     }
 });
+
+// Vérifie les collisions entre les joueurs et les bombes
+function checkCollisions() {
+    if (isPlayerDead) return;
+
+    let player = players[socket.id];
+    if (!player) return;
+
+    bombs.forEach(bomb => {
+        if (player.x === bomb.x && player.y === bomb.y) {
+            isPlayerDead = true;
+            socket.emit('playerDead', socket.id);
+            console.log('You died!');
+        }
+    });
+}
 
 // Met à jour le jeu
 function updateGame() {
