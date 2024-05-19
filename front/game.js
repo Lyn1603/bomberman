@@ -10,6 +10,36 @@ const playerSize = blockSize;
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
 
+socket.on('updatePlayers', (updatedPlayers) => {
+    players = updatedPlayers;
+    render();
+});
+
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let id in players) {
+        const player = players[id];
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(player.x, player.y, blockSize, blockSize);
+    }
+}
+
+function getDept() {
+    const sPageURL = window.location.search.substring(1);
+    const sURLVariables = sPageURL.split('&');
+    for (let i = 0; i < sURLVariables.length; i++) {
+        const sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === 'dept') {
+            return sParameterName[1];
+        }
+    }
+}
+let dept = getDept()
+console.log(dept)
+
+const title = document.getElementById('name')
+title.textContent  = dept
+
 const canvasHeight = numCols * blockSize;
 const canvasWidth = numRows * blockSize;
 
@@ -105,7 +135,6 @@ document.addEventListener('keydown', (event) => {
     if (isPlayerDead) {
         return; // Ne rien faire si le joueur est mort
     }
-
     let direction = '';
     switch(event.key) {
         case 'z':
@@ -156,7 +185,7 @@ document.addEventListener('keydown', (event) => {
 
     // Vérifie si le mouvement est autorisé
     if (isMovementAllowed(direction)) {
-        socket.emit('move', direction);
+        socket.emit('move', dept, direction);
         lastDirection = direction; // Met à jour la dernière direction
     }
 });
@@ -186,16 +215,25 @@ function isMovementAllowed(direction) {
     }
 
     // Vérifie si le mouvement reste dans les limites du canvas
-    if (nextX < 0 || nextX >= canvasWidth || nextY < 0 || nextY >= canvasHeight) {
-        return false;
-    }
+    //if (nextX < 0 || nextX >= canvasWidth || nextY < 0 || nextY >= canvasHeight) {
+    //    return false;
+    //}
 
     // Convertit les coordonnées en indices de tableau
-    let col = Math.floor(nextX / blockSize);
-    let row = Math.floor(nextY / blockSize);
+    //let col = Math.floor(nextX / blockSize);
+    //let row = Math.floor(nextY / blockSize);
 
     // Vérifie si la case dans la direction du mouvement contient un pilier
-    return gameMap[row][col] !== 'p';
+    //return gameMap[row][col] !== 'p';
+
+    return !isObstacle(nextX, nextY)
+}
+
+function isObstacle(x, y) {
+    const col = x / blockSize;
+    const row = y / blockSize;
+    const tile = gameMap[row][col];
+    return tile === 'p' || tile === 'b';
 }
 
 

@@ -4,7 +4,6 @@ socket.on('connect', () => {
     getDept();
 });
 
-
 // Function to request the list of active departments from the server
 function getDept() {
     socket.emit('getDept');
@@ -14,9 +13,6 @@ function getDept() {
 function createDept() {
     const deptName = document.getElementById('newDeptInput').value;
     if (!deptName) return;
-    console.log(deptName)
-
-    console.log(typeof(deptName))
     socket.emit('createDept', deptName);
 }
 
@@ -27,7 +23,6 @@ function deleteDept(dept) {
 
 // Update the list of departments when received from the server
 socket.on('updateDept', (depts) => {
-    console.log('Update depts: ' + depts);
     const deptsList = document.getElementById('deptsList');
     deptsList.innerHTML = '';
     depts.forEach((dept, index) => {
@@ -36,8 +31,6 @@ socket.on('updateDept', (depts) => {
         deptElement.classList.add('dept-card');
         deptElement.addEventListener('click', () => {
             joinDept(dept);
-            // Redirect to the new page after joining the department
-            navigateToBombermanPage(dept);
         });
         deptsList.appendChild(deptElement);
         if (index === depts.length - 1) {
@@ -63,50 +56,22 @@ socket.on('updateDept', (depts) => {
     });
 });
 
-// Function to navigate to Bomberman page with selected department
-function navigateToBombermanPage(deptName) {
-    window.location.href = `game.html?dept=${deptName}`;
-}
 
 // Join a department
 function joinDept(dept) {
-    console.log("join", dept)
-    socket.emit('join', dept);
-
-    // Emit the 'joinRoom' event with the room name
-    socket.emit('joinRoom', dept);
+    socket.emit('joinDept', dept);
+    window.location.href = `game.html?dept=${dept}`;
 }
 
-// Listen for the event to redirect to Bomberman page
-socket.on('redirectToBombermanPage', (roomName) => {
-    navigateToBombermanPage(roomName);
-});
-
-// Function to leave a department
-function leaveDept() {
-    const dept = document.getElementById('deptInput').value;
-    socket.emit('leave', dept);
+// Join a department
+function joinDeptByResearch() {
+    const input = document.getElementById('deptInput');
+    socket.emit('joinDept', input.value);
+    window.location.href = `game.html?dept=${input.value}`;
 }
 
-// Invite to a department
-function inviteUser() {
-    const dept = document.getElementById('deptInput').value;
-    const invitedUserId = document.getElementById('inviteUserId').value;
-    socket.emit('invite', dept, invitedUserId);
-}
-
-// Display a message in the UI
-function displayMessage(msg) {
-    const messagesDiv = document.getElementById('messages');
-    const messageElement = document.createElement('div');
-    messageElement.textContent = msg;
-    messagesDiv.appendChild(messageElement);
-}
-
-socket.on('invitation', (dept) => {
-    const accept = confirm(`You've been invited to join dept "${dept}". Do you accept?`);
-    if (accept) {
-        socket.emit('join', dept);
-        console.log('Joined dept: ' + dept);
-    }
+// Alert for max of 4 players in a room
+socket.on('roomFull', () => {
+    alert('La room contient déjà 4 joueurs !');
+    window.location.href = `index.html`;
 });
