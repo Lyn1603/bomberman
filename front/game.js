@@ -11,7 +11,7 @@ const playerSize = blockSize ;
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
 
-function getRoom() {
+function getDept() {
     const sPageURL = window.location.search.substring(1);
     const sURLVariables = sPageURL.split('&');
     for (let i = 0; i < sURLVariables.length; i++) {
@@ -21,13 +21,13 @@ function getRoom() {
         }
     }
 }
-let room = getRoom()
-console.log(room)
+let dept = getDept()
+console.log(dept)
 
 // Tableau représentant la disposition des éléments dans votre jeu
 const gameMap = [
-    "spppppppppppppp",
-    "sssbbbbbbbbbssp",
+    "ppppppppppppppp",
+    "pssbbbbbbbbbssp",
     "pspbpbpbpbpbpsp",
     "pbbbbbbbbbbbbbp",
     "pbpbpbpbpbpbpbp",
@@ -90,7 +90,6 @@ function drawPlayers() {
     }
 }
 
-
 // Fonction pour dessiner les éléments sur le canvas
 function drawGameMap() {
     for (let row = 0; row < numRows; row++) {
@@ -145,7 +144,7 @@ document.addEventListener('keydown', (event) => {
     }
     // Vérifie si le mouvement est autorisé
     if (isMovementAllowed(direction)) {
-        socket.emit('move', room, direction);
+        socket.emit('move', dept, direction);
         lastDirection = direction; // Met à jour la dernière direction
     }
 });

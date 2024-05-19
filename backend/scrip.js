@@ -6,101 +6,47 @@ import cors from 'cors';
 
 const app = express();
 const server = http.createServer(app);
-const PORT = 3000;
+const PORT = 3002;
 const io = new Server(server, {
     cors: {
         origin: '*',
     }
-});
+})
 
-app.use(cors());
+app.use(cors())
 
 app.get('/', (req, res) => {
-    res.json('IP address: http://' + ip.address() + ':' + PORT);
+    res.json('ip address: http://' + ip.address()+':'+PORT);
 });
 
 const activeDepts = ["je"];
-const blockSize = 40;
-const players = {};
-let bombs = [];
 
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    console.log('a user connected');
     socket.broadcast.emit('user connected');
 
-    players[socket.id] = {
-        x: 0,
-        y: 0,
-    };
-
-    socket.emit('updateDept', activeDepts);
-    socket.emit('updatePlayers', players);
-    socket.emit('updateBombs', bombs);
-
     socket.on('disconnect', () => {
-        console.log('User disconnected');
-        delete players[socket.id];
-        io.emit('updatePlayers', players);
+        console.log('user disconnected');
         socket.broadcast.emit('user disconnected');
     });
 
-    socket.on('move', (room, direction) => {
-        if (players[socket.id] === undefined) {
-            return;
-        }
-
-        if (direction === 'Up') {
-            players[socket.id].y -= blockSize;
-        } else if (direction === 'Down') {
-            players[socket.id].y += blockSize;
-        } else if (direction === 'Left') {
-            players[socket.id].x -= blockSize;
-        } else if (direction === 'Right') {
-            players[socket.id].x += blockSize;
-        }
-
-        bombs.forEach(bomb => {
-            if (players[socket.id].x === bomb.x && players[socket.id].y === bomb.y) {
-                io.emit('playerDead', socket.id);
-            }
-        });
-
-        io.emit('updatePlayers', players);
-        io.to(room).emit('updatePlayers', players);
-    });
-
-    socket.on('placeBomb', ({ x, y }) => {
-        bombs.push({ x, y });
-        io.emit('updateBombs', bombs);
-
-        setTimeout(() => {
-            bombs = bombs.filter(bomb => bomb.x !== x || bomb.y !== y);
-            io.emit('updateBombs', bombs);
-        }, 5000);
-    });
-
-    socket.on('createGame', (gameName) => {
-        console.log("create", gameName);
-        const gameExists = activeDepts.includes(gameName);
-        if (!gameExists) {
-            activeDepts.push(gameName);
-            console.log('Creating game: ' + gameName);
-            socket.join(gameName);
-            io.emit('gameCreated', gameName);
-            io.emit('updateDept', activeDepts);
-        } else {
-            console.error('Game already exists: ' + gameName);
-            socket.emit('gameExistsError', gameName);
-        }
-    });
-
+    // When a client requests the list of active dept, send it to them
     socket.on('getDept', () => {
+        let noDept = activeDepts.length === 0
+        console.log(activeDepts, noDept)
+        if (!noDept) {
+            const name = "Default Department"
+            console.log('helo', typeof(name))
+            socket.emit('updateDept', activeDepts);
+            console.log(name)
+        }
         socket.emit('updateDept', activeDepts);
-    });
+    })
 
+    // Handle createDept event
     socket.on('createDept', (deptName) => {
-        console.log("create", deptName);
-        const deptExists = activeDepts.includes(deptName);
+        console.log("create", deptName)
+        const deptExists = activeDepts.includes(deptName)
         if (!deptExists) {
             activeDepts.push(deptName);
             console.log('Creating dept: ' + deptName);
@@ -109,6 +55,7 @@ io.on('connection', (socket) => {
             io.emit('updateDept', activeDepts);
         } else {
             console.error('Department already exists: ' + deptName);
+            // Send an error message to the client if the department already exists
             socket.emit('deptExistsError', deptName);
         }
     });
@@ -127,18 +74,9 @@ io.on('connection', (socket) => {
         const roomExists = io.sockets.adapter.rooms.has(dept);
         if (roomExists) {
             socket.join(dept);
-            console.log("Join dept: " + dept);
+            console.log("Join dept: " + dept)
         } else {
             console.error('Dept does not exist: ' + dept);
-        }
-    });
-
-    socket.on('invite', (dept, invitedUserId) => {
-        console.log('invite user ' + invitedUserId + ' to dept: ' + dept);
-        if (io.sockets.adapter.rooms.has(dept)) {
-            io.to(invitedUserId).emit('invitation', dept);
-        } else {
-            console.error('The dept does not exist: ' + dept);
         }
     });
 
@@ -148,6 +86,7 @@ io.on('connection', (socket) => {
         io.to(dept).emit('leave', dept);
     });
 
+    // Handle deleteDept event
     socket.on('deleteDept', (deptName) => {
         const index = activeDepts.indexOf(deptName);
         if (index !== -1) {
@@ -156,12 +95,12 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('joinRoom', (roomName) => {
+    socket.on('joinDept', (roomName) => {
         io.emit('redirectToBombermanPage', roomName);
     });
 
-});
+})
 
 server.listen(PORT, () => {
-    console.log('Server IP: http://' + ip.address() + ":" + PORT);
-});
+    console.log('Server ip : http://' +ip.address() +":" + PORT);
+})
