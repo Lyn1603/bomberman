@@ -287,3 +287,8 @@ socket.on('playerDead', (playerId, bomb) => {
         console.log('Another player died');
     }
 });
+
+function leaveDept() {
+    socket.emit('leave', dept)
+    window.location.href = `index.html`;
+}

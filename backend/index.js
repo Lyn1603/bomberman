@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
     res.json('IP address: http://' + ip.address() + ':' + PORT);
 });
 
-const activeDepts = ["je"];
+const activeDepts = ["Defaut"];
 const blockSize = 40;
 const players = {};
 let bombs = [];
@@ -185,10 +185,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('leave', (dept) => {
-        console.log('leave dept: ' + dept);
-        socket.leave(dept);
-        io.to(dept).emit('leave', dept);
+    socket.on('leave', (deptName) => {
+        console.log('leave dept: ' + deptName);
+        socket.leave(deptName);
+        playersInDept[deptName]--;
+        io.to(deptName).emit('leave', deptName);
     });
 
     socket.on('deleteDept', (deptName) => {

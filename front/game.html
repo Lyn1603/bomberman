@@ -27,12 +27,19 @@
                 animation: explosionAnimation 0.5s ease-out forwards; /* Animation */
                 /* Ajoutez cette propriété pour initialiser l'explosion en tant qu'invisible */
             }
+
+            button {
+                padding: 8px 16px;
+                margin: 10px;
+            }
         </style>
     </head>
 
     <body>
         <h1>Bomberman salle : <span id="name"></span></h1>
         <canvas id="gameCanvas" width="600" height="600"></canvas>
+
+        <button onclick="leaveDept()"> Quitter la salle</button>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
         <script src="game.js"></script>
