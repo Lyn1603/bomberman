@@ -1,21 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Bomberman</title>
-    <style>
-        canvas {
-            border: 1px solid black;
-        }
+        <title>Bomberman</title>
+        <style>
+            canvas {
+                border: 1px solid black;
+            }
+        </style>
+    </head>
 
-    </style>
-</head>
-<body >
-<h1>Bomberman</h1>
-<canvas id="gameCanvas" width="600" height="600"></canvas>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-<script src="game.js"></script>
-</body>
+    <body >
+        <h1>Bomberman</h1>
+
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <script src="game.js"></script>
+
+        <script>
+
+            socket.on('updatePlayers', (players) => {
+                const gameDiv = document.getElementById('gameCanvas');
+                gameDiv.innerHTML = ''; // Clear previous display
+                Object.keys(players).forEach(playerId => {
+                    const player = players[playerId];
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'player';
+                    playerDiv.style.left = player.x + 'px';
+                    playerDiv.style.top = player.y + 'px';
+                    gameDiv.appendChild(playerDiv);
+                });
+            });
+
+        </script>
+    </body>
 </html>

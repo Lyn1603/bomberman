@@ -29,8 +29,8 @@ const canvasWidth = numRows * blockSize
 
 // Tableau représentant la disposition des éléments dans votre jeu
 const gameMap = [
-    "spppppppppppppp",
-    "sssbbbbbbbbbssp",
+    "ppppppppppppppp",
+    "pssbbbbbbbbbssp",
     "pspbpbpbpbpbpsp",
     "pbbbbbbbbbbbbbp",
     "pbpbpbpbpbpbpbp",
@@ -166,7 +166,7 @@ document.addEventListener('keydown', (event) => {
 
     // Vérifie si le mouvement est autorisé
     if (isMovementAllowed(direction)) {
-        socket.emit('move', direction);
+        socket.emit('move', dept, direction);
         lastDirection = direction; // Met à jour la dernière direction
     }
 });

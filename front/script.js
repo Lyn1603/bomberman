@@ -56,13 +56,22 @@ socket.on('updateDept', (depts) => {
     });
 });
 
+
 // Join a department
 function joinDept(dept) {
     socket.emit('joinDept', dept);
     window.location.href = `game.html?dept=${dept}`;
 }
 
+// Join a department
+function joinDeptByResearch() {
+    const input = document.getElementById('deptInput');
+    socket.emit('joinDept', input.value);
+    window.location.href = `game.html?dept=${input.value}`;
+}
+
+// Alert for max of 4 players in a room
 socket.on('roomFull', () => {
-    alert('Room is full!');
+    alert('La room contient déjà 4 joueurs !');
     window.location.href = `index.html`;
 });
