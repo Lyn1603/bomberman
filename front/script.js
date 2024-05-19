@@ -1,73 +1,77 @@
 const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
-    console.log('Connected to server');
+    getDept();
 });
 
-socket.on('message', (msg) => {
-    displayMessage(msg);
-});
-
-socket.on('join', (dept) => {
-    console.log('Joined dept: ' + dept);
-});
-
-socket.on('leave', (dept) => {
-    console.log('leave dept: ' + dept);
-});
-
-socket.on('deleteDept', (dept) => {
-    console.log('delete dept: ' + dept);
-});
-
-socket.on('invitation', (dept) => {
-    const accept = confirm(`You've been invited to join dept "${dept}". Do you accept?`);
-    if (accept) {
-        socket.emit('join', dept);
-        console.log('Joined dept: ' + dept);
-    }
-});
-
-socket.on('updateDept', (dept) => {
-    console.log('update dept: ' + dept);
-    const deptList = document.getElementById('deptList')
-})
-/*function sendMessage() {
-    const message = document.getElementById('messageInput').value;
-    socket.emit('message', message);
-}*/
-
-function leaveDept() {
-    const dept = document.getElementById('deptInput').value;
-    socket.emit('leave', dept);
+// Function to request the list of active departments from the server
+function getDept() {
+    socket.emit('getDept');
 }
 
-function joinDept() {
-    const dept = document.getElementById('deptInput').value;
-    socket.emit('join', dept);
-}
-
-function inviteUser() {
-    const dept = document.getElementById('deptInput').value;
-    const invitedUserId = document.getElementById('inviteUserId').value;
-    socket.emit('invite', dept, invitedUserId);
-}
-
+// Create a new department
 function createDept() {
     const deptName = document.getElementById('newDeptInput').value;
+    if (!deptName) return;
     socket.emit('createDept', deptName);
 }
+
+// Delete a department
 function deleteDept(dept) {
     socket.emit('deleteDept', dept);
 }
 
-function displayMessage(msg) {
-    const messagesDiv = document.getElementById('messages');
-    const messageElement = document.createElement('div');
-    messageElement.textContent = msg;
-    messagesDiv.appendChild(messageElement);
+// Update the list of departments when received from the server
+socket.on('updateDept', (depts) => {
+    const deptsList = document.getElementById('deptsList');
+    deptsList.innerHTML = '';
+    depts.forEach((dept, index) => {
+        const deptElement = document.createElement('div');
+        deptElement.textContent = dept;
+        deptElement.classList.add('dept-card');
+        deptElement.addEventListener('click', () => {
+            joinDept(dept);
+        });
+        deptsList.appendChild(deptElement);
+        if (index === depts.length - 1) {
+            // Create a "create" card for the last department
+            const createCard = document.createElement('div');
+            createCard.id = 'createCard';
+            createCard.classList.add('create-card');
+            const input = document.createElement('input');
+            input.id = 'newDeptInput';
+            input.classList.add('newDeptInput');
+            input.type = 'text';
+            input.placeholder = 'New dept';
+            const button = document.createElement('button');
+            button.textContent = '✔';
+            button.classList.add('create-button'); // Add class to style the card
+            button.addEventListener('click', () => {
+                createDept(input.value);
+            });
+            createCard.appendChild(input);
+            createCard.appendChild(button);
+            deptsList.appendChild(createCard);
+        }
+    });
+});
+
+
+// Join a department
+function joinDept(dept) {
+    socket.emit('joinDept', dept);
+    window.location.href = `game.html?dept=${dept}`;
 }
 
-function getdept() {
-    socket.emit('getdept');
+// Join a department
+function joinDeptByResearch() {
+    const input = document.getElementById('deptInput');
+    socket.emit('joinDept', input.value);
+    window.location.href = `game.html?dept=${input.value}`;
 }
+
+// Alert for max of 4 players in a room
+socket.on('roomFull', () => {
+    alert('La room contient déjà 4 joueurs !');
+    window.location.href = `index.html`;
+});
