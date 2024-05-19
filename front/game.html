@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
 
     <title>Bomberman</title>
     <style>
@@ -10,9 +11,25 @@
             border: 1px solid black;
         }
 
+        @keyframes explosionAnimation {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #FF0000; /* Couleur de l'explosion */
+            border-radius: 50%; /* Pour obtenir un cercle */
+            animation: explosionAnimation 0.5s ease-out forwards; /* Animation */
+            /* Ajoutez cette propriété pour initialiser l'explosion en tant qu'invisible */
+        }
+
+
     </style>
 </head>
-<body >
+<body>
 <h1>Bomberman</h1>
 <canvas id="gameCanvas" width="600" height="600"></canvas>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>

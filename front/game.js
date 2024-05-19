@@ -4,22 +4,19 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const blockSize = 40; // Taille du bloc
-
 const bombSize = blockSize;
 const playerSize = blockSize;
 
 const numRows = 15; // Nombre de lignes
 const numCols = 15; // Nombre de colonnes
 
-const canvasHeight = numCols * blockSize
-const canvasWidth = numRows * blockSize
-
-
+const canvasHeight = numCols * blockSize;
+const canvasWidth = numRows * blockSize;
 
 // Tableau représentant la disposition des éléments dans votre jeu
 const gameMap = [
-    "spppppppppppppp",
-    "sssbbbbbbbbbssp",
+    "ppppppppppppppp",
+    "pssbbbbbbbbbssp",
     "pspbpbpbpbpbpsp",
     "pbbbbbbbbbbbbbp",
     "pbpbpbpbpbpbpbp",
@@ -39,9 +36,6 @@ let players = {};
 let bombs = [];
 let lastDirection = ''; // Variable pour stocker la dernière direction
 let isPlayerDead = false;
-
-let elapsedTime = 0; // Temps écoulé en secondes
-const gameTimeLimit = 60; // Limite de temps en secondes (1 minute)
 
 // Chargement des images
 const pillarImg = new Image();
@@ -148,6 +142,12 @@ document.addEventListener('keydown', (event) => {
                 }
 
                 socket.emit('placeBomb', { x: bombX, y: bombY });
+
+                // Vérifie si le joueur traverse une bombe
+                checkCollisions(players[socket.id]);
+
+                // récupère les coordonnées de la bombe
+                bombs.push({ x: bombX, y: bombY } )
             }
             return; // Ne rien faire d'autre pour la touche espace
         default:
@@ -198,6 +198,29 @@ function isMovementAllowed(direction) {
     return gameMap[row][col] !== 'p';
 }
 
+
+
+
+// Vérifie les collisions entre les joueurs et les bombes
+function checkCollisions() {
+    if (isPlayerDead) return;
+
+    let player = players[socket.id];
+    if (!player) return;
+
+
+
+}
+
+// Met à jour le jeu
+function updateGame() {
+    drawGameMap(); // Dessine d'abord les éléments de la scène (décors, obstacles, etc.)
+    drawPlayers(); // Puis dessine les joueurs
+    drawBombs();   // Dessine ensuite les bombes
+    checkCollisions(); // Vérifie les collisions après la mise à jour du jeu
+
+}
+
 // Gère la réception des mouvements des autres joueurs
 socket.on('updatePlayers', (data) => {
     players = data;
@@ -213,34 +236,16 @@ socket.on('updateBombs', (data) => {
 });
 
 // Gère la réception de la mort d'un joueur
-socket.on('playerDead', (playerId) => {
+socket.on('playerDead', (playerId, bomb) => {
+
     if (playerId === socket.id) {
         isPlayerDead = true;
-        console.log('You died!');
+        alert(' You died ! Try again ')// Créez une nouvelle div pour l'explosion
+        const explosionDiv = document.createElement('div');
+        explosionDiv.classList.add('explosion');
+        console.log(explosionDiv)
+
     } else {
         console.log('Another player died');
     }
 });
-
-// Vérifie les collisions entre les joueurs et les bombes
-function checkCollisions() {
-    if (isPlayerDead) return;
-
-    let player = players[socket.id];
-    if (!player) return;
-
-    bombs.forEach(bomb => {
-        if (player.x === bomb.x && player.y === bomb.y) {
-            isPlayerDead = true;
-            socket.emit('playerDead', socket.id);
-            console.log('You died!');
-        }
-    });
-}
-
-// Met à jour le jeu
-function updateGame() {
-    drawGameMap(); // Dessine d'abord les éléments de la scène (décors, obstacles, etc.)
-    drawPlayers(); // Puis dessine les joueurs
-    drawBombs();   // Dessine ensuite les bombes
-}
